@@ -2,6 +2,8 @@ import type { ProposedLetter } from '@/types/ProposedLetter';
 import { LetterStatus } from '@/enums/letterStatus';
 import words from '@/data/words';
 import { RoundStatus } from '@/enums/roundStatus';
+import generateYoCombinations from '@/libs/generateYoCombinations';
+import replaceYo from '@/libs/replaceYo';
 
 function reduceWord(proposedWord: ProposedLetter[]): string {
   return proposedWord.reduce((previousValue, currentValue) => {
@@ -9,7 +11,8 @@ function reduceWord(proposedWord: ProposedLetter[]): string {
   }, '');
 }
 function checkWordExist(word: string) {
-  return words.indexOf(word) >= 0;
+  const combinations = generateYoCombinations(word);
+  return combinations.some((combination) => words.includes(combination));
 }
 
 export default function compareWords(
@@ -17,11 +20,14 @@ export default function compareWords(
   secretWord: string
 ): { status: RoundStatus; proposedWord: ProposedLetter[] } {
   const isWordExist = checkWordExist(reduceWord(proposedWord));
+  const normalizedSecretWord = replaceYo(secretWord);
+
   if (!isWordExist) {
     return { status: RoundStatus.NOT_FOUND, proposedWord };
   }
 
-  const secretWordArray: Array<string | null> = secretWord.split('');
+  const secretWordArray: Array<string | null> = normalizedSecretWord.split('');
+
   const result: ProposedLetter[] = proposedWord.map((letterObj) => ({
     ...letterObj,
     status: LetterStatus.NOT_IN_WORD
