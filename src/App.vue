@@ -9,10 +9,15 @@ import { RoundStatus } from '@/enums/roundStatus';
 import { GameStatus } from '@/enums/gameStatus';
 import { LetterStatus } from '@/enums/letterStatus';
 
-import InnerKeyboard from '@/components/InnerKeyboard.vue';
 import getRandomNumber from '@/libs/getRandomNumber';
 import compareWords from '@/libs/compareWords';
+
 import AppModal from '@/components/AppModal.vue';
+import KeyboardKey from '@/components/KeyboardKey.vue';
+
+import useButtons from '@/composables/useButtons';
+
+const { buttons, updateButtonStatus, resetButtons } = useButtons();
 
 const modal = ref(false);
 const secretWord = ref<string>('');
@@ -39,6 +44,7 @@ function onStartGame() {
   cell.value = 0;
   isGameOver.value = false;
   gameStatus.value = GameStatus.PLAYING;
+  resetButtons();
   const number = getRandomNumber(0, words.length - 1);
   secretWord.value = words[number];
   modal.value = false;
@@ -59,16 +65,21 @@ function onClearLetter() {
   cell.value -= 1;
   grid.value[round.value][cell.value].letter = '';
 }
-
 function onCheckWord() {
   if (cell.value !== 4 || grid.value[round.value][cell.value].letter === '') return;
-  const result = compareWords(grid.value[round.value], secretWord.value);
-  if (result.status === RoundStatus.NOT_FOUND) {
-    return;
+
+  const currentRow = grid.value[round.value];
+  const result = compareWords(currentRow, secretWord.value);
+
+  if (result.status === RoundStatus.NOT_FOUND) return;
+
+  for (const index in currentRow) {
+    const status = result.proposedWord[index].status;
+    currentRow[index].status = status;
+    const { letter } = currentRow[index];
+    updateButtonStatus(letter, status);
   }
-  for (const index in result.proposedWord) {
-    grid.value[round.value][index].status = result.proposedWord[index].status;
-  }
+
   if (result.status === RoundStatus.WIN) {
     isGameOver.value = true;
     gameStatus.value = GameStatus.WIN;
@@ -96,7 +107,7 @@ onMounted(() => {
   >
     <div class="w-full max-w-[1104px] bg-[#1c1c1e] px-4 py-4 sm:h-auto sm:rounded-3xl sm:py-24">
       <div class="mx-auto max-w-[655px]">
-        <img src="/logo.png" class="mb-6 h-6" alt="" />
+        <img src="/logo.png" class="mb-6 h-6" alt="Игра «5 букв»" />
         <div class="relative mx-auto mb-[26px] max-w-[80%] space-y-1.5 sm:max-w-[560px]">
           <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="flex space-x-1.5">
             <div
@@ -118,17 +129,32 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <InnerKeyboard @input="onInput" @delete="onClearLetter" @apply="onCheckWord" />
+      <div class="w-full overflow-x-hidden">
+        <div
+          :key="rowIndex"
+          v-for="(buttonRow, rowIndex) in buttons"
+          class="mb-6 flex justify-center space-x-0.5 last:mb-0 sm:space-x-2"
+        >
+          <template :key="button.symbol" v-for="button in buttonRow">
+            <KeyboardKey
+              @input="onInput"
+              @delete="onClearLetter"
+              @apply="onCheckWord"
+              :keyboard-button="button"
+            />
+          </template>
+        </div>
+      </div>
     </div>
     <AppModal prevent-close :model-value="modal">
       <div class="w-full max-w-[616px] rounded-3xl bg-[#2c2c2e] px-20 py-12 text-center">
         <p class="mb-4 text-center text-xl font-semibold text-[#ffdd2d]">
           {{
             gameStatus === GameStatus.PLAYING
-              ? 'Отгадайте первое слово'
-              : GameStatus.WIN
-                ? 'Вы отгадали слово!'
-                : 'Вы не отгадали слово'
+              ? 'Отгадайте первое слово 🤔'
+              : gameStatus === GameStatus.WIN
+                ? 'Вы отгадали слово! 😊'
+                : 'Вы не отгадали слово 😞'
           }}
         </p>
         <button
