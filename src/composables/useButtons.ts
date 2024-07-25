@@ -57,19 +57,26 @@ const initialButtons = [
   ]
 ];
 
+function shouldUpdateStatus(currentStatus: LetterStatus | null, newStatus: LetterStatus): boolean {
+  if (newStatus === LetterStatus.CORRECT) return true;
+  if (newStatus === LetterStatus.WRONG_PLACE && currentStatus !== LetterStatus.CORRECT) return true;
+  return newStatus === LetterStatus.NOT_IN_WORD && currentStatus === LetterStatus.DEFAULT;
+}
+
+function updateButton(button: KeyboardButton, newStatus: LetterStatus) {
+  if (button.type === KeyboardType.LETTER && shouldUpdateStatus(button.status, newStatus)) {
+    button.status = newStatus;
+  }
+}
+
 export default function useButtons() {
   const buttons = ref<KeyboardButton[][]>(initialButtons);
 
   const updateButtonStatus = (symbol: string, newStatus: LetterStatus) => {
     for (const row of buttons.value) {
       for (const button of row) {
-        if (
-          button.symbol === symbol &&
-          button.type === KeyboardType.LETTER &&
-          button.status === LetterStatus.DEFAULT
-        ) {
-          button.status = newStatus;
-          return;
+        if (button.symbol === symbol) {
+          updateButton(button, newStatus);
         }
       }
     }
