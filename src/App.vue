@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import words from '@/data/words';
 
@@ -16,6 +16,8 @@ import AppModal from '@/components/AppModal.vue';
 import KeyboardKey from '@/components/KeyboardKey.vue';
 
 import useButtons from '@/composables/useButtons';
+import reduceWord from '@/libs/reduceWord';
+import type { CompareWordsResult } from '@/types/CompareWordsResult';
 
 const { buttons, updateButtonStatus, resetButtons } = useButtons();
 
@@ -28,6 +30,13 @@ const grid = ref<Cell[][]>(fillGrid());
 
 const round = ref<0 | 1 | 2 | 3 | 4 | 5>(0);
 const cell = ref<0 | 1 | 2 | 3 | 4>(0);
+
+const usedWords = computed(() => {
+  return grid.value
+    .slice(0, round.value)
+    .map((row) => row.map((cell) => cell.letter).join(''))
+    .filter((word) => word.trim().length === 5);
+});
 
 function fillGrid() {
   return Array(6)
@@ -65,33 +74,41 @@ function onClearLetter() {
   cell.value -= 1;
   grid.value[round.value][cell.value].letter = '';
 }
-function onCheckWord() {
-  if (cell.value !== 4 || grid.value[round.value][cell.value].letter === '') return;
-
-  const currentRow = grid.value[round.value];
-  const result = compareWords(currentRow, secretWord.value);
-
-  if (result.status === RoundStatus.NOT_FOUND) return;
-
-  for (const index in currentRow) {
-    const status = result.proposedWord[index].status;
-    currentRow[index].status = status;
-    const { letter } = currentRow[index];
-    updateButtonStatus(letter, status);
-  }
-
+function checkGameStatus(result: CompareWordsResult) {
   if (result.status === RoundStatus.WIN) {
     isGameOver.value = true;
     gameStatus.value = GameStatus.WIN;
     modal.value = true;
-    return;
+    return true;
   }
   if (round.value === 5) {
     isGameOver.value = true;
     gameStatus.value = GameStatus.LOSE;
     modal.value = true;
-    return;
+    return true;
   }
+  return false;
+}
+function updateStatuses(currentRow: Cell[], result: CompareWordsResult) {
+  currentRow.forEach((cell, index) => {
+    const status = result.proposedWord[index].status;
+    cell.status = status;
+    updateButtonStatus(cell.letter, status);
+  });
+}
+function onCheckWord() {
+  const currentRow = grid.value[round.value];
+
+  if (cell.value !== 4 || currentRow[cell.value].letter === '') return;
+
+  const reducedWord = reduceWord(currentRow);
+  if (usedWords.value.includes(reducedWord)) return;
+
+  const result = compareWords(currentRow, secretWord.value);
+  if (result.status === RoundStatus.NOT_FOUND) return;
+
+  updateStatuses(currentRow, result);
+  if (checkGameStatus(result)) return;
 
   cell.value = 0;
   round.value += 1;

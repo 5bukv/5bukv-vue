@@ -4,12 +4,9 @@ import words from '@/data/words';
 import { RoundStatus } from '@/enums/roundStatus';
 import generateYoCombinations from '@/libs/generateYoCombinations';
 import replaceYo from '@/libs/replaceYo';
+import reduceWord from '@/libs/reduceWord';
+import type { CompareWordsResult } from '@/types/CompareWordsResult';
 
-function reduceWord(proposedWord: ProposedLetter[]): string {
-  return proposedWord.reduce((previousValue, currentValue) => {
-    return previousValue + currentValue.letter;
-  }, '');
-}
 function checkWordExist(word: string) {
   const combinations = generateYoCombinations(word);
   return combinations.some((combination) => words.includes(combination));
@@ -18,7 +15,7 @@ function checkWordExist(word: string) {
 export default function compareWords(
   proposedWord: ProposedLetter[],
   secretWord: string
-): { status: RoundStatus; proposedWord: ProposedLetter[] } {
+): CompareWordsResult {
   const isWordExist = checkWordExist(reduceWord(proposedWord));
   const normalizedSecretWord = replaceYo(secretWord);
 
