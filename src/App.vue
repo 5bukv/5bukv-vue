@@ -2,12 +2,12 @@
 import { onMounted } from 'vue';
 
 import { GameStatus } from '@/enums/gameStatus';
-import { LetterStatus } from '@/enums/letterStatus';
 
 import AppModal from '@/components/AppModal.vue';
 import KeyboardKey from '@/components/KeyboardKey.vue';
 
 import useGame from '@/composables/useGame';
+import RoundCell from '@/components/RoundCell.vue';
 
 const { grid, modal, buttons, gameStatus, onStartGame, onInput, onClearLetter, onCheckWord } =
   useGame();
@@ -25,22 +25,12 @@ onMounted(() => {
         <img src="/logo.png" class="mb-6 h-6" alt="Игра «5 букв»" />
         <div class="relative mx-auto mb-[26px] max-w-[80%] space-y-1.5 sm:max-w-[560px]">
           <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="flex space-x-1.5">
-            <div
-              v-for="(_, cellIndex) in row"
-              :key="cellIndex"
-              class="flex aspect-[0.92/1] max-w-[calc((100%_-_24px)_/_5)] flex-grow select-none items-center justify-center rounded-md border text-3xl leading-[62px] sm:text-6xl"
-              :class="{
-                'border-[#ffdd2d]': grid[rowIndex][cellIndex].status === LetterStatus.DEFAULT,
-                'border-[#5f5f5f] bg-[#5f5f5f]':
-                  grid[rowIndex][cellIndex].status === LetterStatus.NOT_IN_WORD,
-                'border-white bg-white text-black':
-                  grid[rowIndex][cellIndex].status === LetterStatus.WRONG_PLACE,
-                'border-[#ffdd2d] bg-[#ffdd2d] text-black':
-                  grid[rowIndex][cellIndex].status === LetterStatus.CORRECT
-              }"
-            >
-              {{ grid[rowIndex][cellIndex].letter }}
-            </div>
+            <template :key="cellIndex" v-for="(_, cellIndex) in row">
+              <RoundCell
+                :status="grid[rowIndex][cellIndex].status"
+                :letter="grid[rowIndex][cellIndex].letter"
+              />
+            </template>
           </div>
         </div>
       </div>
