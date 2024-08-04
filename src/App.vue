@@ -3,14 +3,28 @@ import { onMounted } from 'vue';
 
 import { GameStatus } from '@/enums/gameStatus';
 
+import useGame from '@/composables/useGame';
+
 import AppModal from '@/components/AppModal.vue';
 import KeyboardKey from '@/components/KeyboardKey.vue';
-
-import useGame from '@/composables/useGame';
 import RoundCell from '@/components/RoundCell.vue';
+import CellTooltip from '@/components/CellTooltip.vue';
 
-const { grid, modal, buttons, gameStatus, onStartGame, onInput, onClearLetter, onCheckWord } =
-  useGame();
+const {
+  grid,
+  modal,
+  buttons,
+  gameStatus,
+  errorState,
+  round,
+  tooltip,
+  hideTooltip,
+  onStartGame,
+  onInput,
+  onClearLetter,
+  onCheckWord,
+  onCellClick
+} = useGame();
 
 onMounted(() => {
   modal.value = true;
@@ -18,18 +32,36 @@ onMounted(() => {
 </script>
 <template>
   <main
-    class="h-screen justify-center text-white sm:flex sm:flex-col sm:items-center sm:bg-[#2C2C2E]"
+    class="min-h-screen justify-center text-white sm:flex sm:flex-col sm:items-center sm:bg-[#2C2C2E]"
   >
     <div class="w-full max-w-[1104px] bg-[#1c1c1e] px-4 py-4 sm:h-auto sm:rounded-3xl sm:py-24">
       <div class="mx-auto max-w-[655px]">
         <img src="/logo.png" class="mb-6 h-6" alt="Игра «5 букв»" />
         <div class="relative mx-auto mb-[26px] max-w-[80%] space-y-1.5 sm:max-w-[560px]">
-          <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="flex space-x-1.5">
+          <div
+            v-for="(row, rowIndex) in grid"
+            :key="rowIndex"
+            :class="{ 'animate-shake text-error-red': errorState.active && rowIndex === round }"
+            class="flex space-x-1.5"
+          >
             <template :key="cellIndex" v-for="(_, cellIndex) in row">
               <RoundCell
+                @click="onCellClick"
                 :status="grid[rowIndex][cellIndex].status"
                 :letter="grid[rowIndex][cellIndex].letter"
-              />
+                :rowIndex="rowIndex"
+                :cellIndex="cellIndex"
+                :tooltip-config="tooltip"
+              >
+                <template #tooltip="{ position: { rowIndex, cellIndex } }">
+                  <CellTooltip
+                    @hide="hideTooltip"
+                    :config="tooltip"
+                    :rowIndex="rowIndex"
+                    :cellIndex="cellIndex"
+                  />
+                </template>
+              </RoundCell>
             </template>
           </div>
         </div>
@@ -56,10 +88,10 @@ onMounted(() => {
         <p class="mb-4 text-center text-xl font-semibold text-[#ffdd2d]">
           {{
             gameStatus === GameStatus.PLAYING
-              ? 'Отгадайте первое слово 🤔'
+              ? 'Отгадайте первое слово'
               : gameStatus === GameStatus.WIN
-                ? 'Вы отгадали слово! 😊'
-                : 'Вы не отгадали слово 😞'
+                ? 'Вы отгадали слово!'
+                : 'Вы не отгадали слово'
           }}
         </p>
         <button
