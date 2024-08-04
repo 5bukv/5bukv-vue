@@ -51,7 +51,6 @@ onMounted(() => {
                 :letter="grid[rowIndex][cellIndex].letter"
                 :rowIndex="rowIndex"
                 :cellIndex="cellIndex"
-                :tooltip-config="tooltip"
               >
                 <template #tooltip="{ position: { rowIndex, cellIndex } }">
                   <CellTooltip

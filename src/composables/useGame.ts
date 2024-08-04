@@ -105,6 +105,7 @@ export default function useGame() {
     });
   }
   function triggerErrorAnimation(): Promise<void> {
+    tooltip.show = false;
     return new Promise((resolve) => {
       errorState.active = true;
       setTimeout(() => {
