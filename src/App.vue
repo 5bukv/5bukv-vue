@@ -37,7 +37,7 @@ onMounted(() => {
     <div class="w-full max-w-[1104px] bg-[#1c1c1e] px-4 py-4 sm:h-auto sm:rounded-3xl sm:py-24">
       <div class="mx-auto max-w-[655px]">
         <img src="/logo.png" class="mb-6 h-6" alt="Игра «5 букв»" />
-        <div class="relative mx-auto mb-[26px] max-w-[80%] space-y-1.5 sm:max-w-[560px]">
+        <div class="relative mx-auto mb-[26px] max-w-[80%] space-y-1.5 sm:max-w-64">
           <div
             v-for="(row, rowIndex) in grid"
             :key="rowIndex"
