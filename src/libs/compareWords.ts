@@ -1,6 +1,6 @@
 import type { ProposedLetter } from '@/types/ProposedLetter';
 import { LetterStatus } from '@/enums/letterStatus';
-import words from '@/data/words';
+import words from '@/data/words.json';
 import { RoundStatus } from '@/enums/roundStatus';
 import generateYoCombinations from '@/libs/generateYoCombinations';
 import replaceYo from '@/libs/replaceYo';

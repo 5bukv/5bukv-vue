@@ -1,4 +1,4 @@
-import words from '@/data/words';
+import words from '@/data/words.json';
 
 import { computed, reactive, ref } from 'vue';
 
