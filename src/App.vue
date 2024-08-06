@@ -82,7 +82,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <AppModal prevent-close :model-value="modal">
+    <AppModal :value="modal">
       <div class="w-full max-w-[616px] rounded-3xl bg-[#2c2c2e] px-20 py-12 text-center">
         <p class="mb-4 text-center text-xl font-semibold text-[#ffdd2d]">
           {{
