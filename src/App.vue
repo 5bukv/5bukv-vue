@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 
-import { GameStatus } from '@/enums/gameStatus';
-
-import useGame from '@/composables/useGame';
-
 import AppModal from '@/components/AppModal.vue';
+import CellTooltip from '@/components/CellTooltip.vue';
 import KeyboardKey from '@/components/KeyboardKey.vue';
 import RoundCell from '@/components/RoundCell.vue';
-import CellTooltip from '@/components/CellTooltip.vue';
+import useGame from '@/composables/useGame';
+import { GameStatus } from '@/enums/gameStatus';
 
 const {
   grid,
@@ -44,20 +42,20 @@ onMounted(() => {
             :class="{ 'animate-shake text-error-red': errorState.active && rowIndex === round }"
             class="flex space-x-1.5"
           >
-            <template :key="cellIndex" v-for="(_, cellIndex) in row">
+            <template v-for="(_, cellIndex) in row" :key="cellIndex">
               <RoundCell
-                @click="onCellClick"
                 :status="grid[rowIndex][cellIndex].status"
                 :letter="grid[rowIndex][cellIndex].letter"
-                :rowIndex="rowIndex"
-                :cellIndex="cellIndex"
+                :row-index="rowIndex"
+                :cell-index="cellIndex"
+                @click="onCellClick"
               >
-                <template #tooltip="{ position: { rowIndex, cellIndex } }">
+                <template #tooltip="{ position }">
                   <CellTooltip
-                    @hide="hideTooltip"
                     :config="tooltip"
-                    :rowIndex="rowIndex"
-                    :cellIndex="cellIndex"
+                    :row-index="position.rowIndex"
+                    :cell-index="position.cellIndex"
+                    @hide="hideTooltip"
                   />
                 </template>
               </RoundCell>
@@ -67,16 +65,16 @@ onMounted(() => {
       </div>
       <div class="w-full overflow-x-hidden">
         <div
-          :key="rowIndex"
           v-for="(buttonRow, rowIndex) in buttons"
+          :key="rowIndex"
           class="mb-6 flex justify-center space-x-0.5 last:mb-0 sm:space-x-2"
         >
-          <template :key="button.symbol" v-for="button in buttonRow">
+          <template v-for="button in buttonRow" :key="button.symbol">
             <KeyboardKey
+              :keyboard-button="button"
               @input="onInput"
               @delete="onClearLetter"
               @apply="onCheckWord"
-              :keyboard-button="button"
             />
           </template>
         </div>
@@ -94,8 +92,8 @@ onMounted(() => {
           }}
         </p>
         <button
-          @click="onStartGame"
           class="mx-auto rounded-2xl bg-white px-6 py-4 text-[17px] font-normal text-[#333]"
+          @click="onStartGame"
         >
           {{ gameStatus === GameStatus.PLAYING ? 'Начать игру' : 'Играть снова' }}
         </button>

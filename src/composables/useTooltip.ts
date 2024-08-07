@@ -1,8 +1,9 @@
 import { reactive, ref } from 'vue';
-import type { Tooltip } from '@/types/Tooltip';
+
 import { TooltipEmojis, TooltipMessages } from '@/constants/tooltipMessages';
-import { TOOLTIP_MESSAGE } from '@/enums/tooltipMessage';
 import { LetterStatus } from '@/enums/letterStatus';
+import { TOOLTIP_MESSAGE } from '@/enums/tooltipMessage';
+import type { Tooltip } from '@/types/Tooltip';
 
 export default function useTooltip() {
   let tooltipTimeout: ReturnType<typeof setTimeout>;

@@ -1,3 +1,12 @@
+<script setup lang="ts">
+defineProps({
+  value: {
+    type: Boolean,
+    default: false
+  },
+});
+</script>
+
 <template>
   <div
     :class="{ hidden: !value }"
@@ -6,13 +15,3 @@
     <slot name="default" />
   </div>
 </template>
-<script setup lang="ts">
-import { defineComponent } from 'vue';
-defineComponent({ name: 'AppModal' });
-defineProps({
-  value: {
-    type: Boolean,
-    default: false
-  },
-});
-</script>

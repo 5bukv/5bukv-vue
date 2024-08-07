@@ -1,21 +1,18 @@
-import words from '@/data/words.json';
-
 import { computed, reactive, ref } from 'vue';
 
-import type { Cell } from '@/types/Cell';
-import type { CompareWordsResult } from '@/types/CompareWordsResult';
-
+import useButtons from '@/composables/useButtons';
+import useTooltip from '@/composables/useTooltip';
+import words from '@/data/words.json';
+import { ErrorStatus } from '@/enums/errorStatus';
 import { GameStatus } from '@/enums/gameStatus';
 import { LetterStatus } from '@/enums/letterStatus';
 import { RoundStatus } from '@/enums/roundStatus';
-
-import useButtons from '@/composables/useButtons';
+import { TOOLTIP_MESSAGE } from '@/enums/tooltipMessage';
+import compareWords from '@/libs/compareWords';
 import getRandomNumber from '@/libs/getRandomNumber';
 import reduceWord from '@/libs/reduceWord';
-import compareWords from '@/libs/compareWords';
-import { ErrorStatus } from '@/enums/errorStatus';
-import { TOOLTIP_MESSAGE } from '@/enums/tooltipMessage';
-import useTooltip from '@/composables/useTooltip';
+import type { Cell } from '@/types/Cell';
+import type { CompareWordsResult } from '@/types/CompareWordsResult';
 
 export default function useGame() {
   const { buttons, updateButtonStatus, resetButtons } = useButtons();

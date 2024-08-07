@@ -1,11 +1,11 @@
-import type { ProposedLetter } from '@/types/ProposedLetter';
-import { LetterStatus } from '@/enums/letterStatus';
 import words from '@/data/words.json';
+import { LetterStatus } from '@/enums/letterStatus';
 import { RoundStatus } from '@/enums/roundStatus';
 import generateYoCombinations from '@/libs/generateYoCombinations';
-import replaceYo from '@/libs/replaceYo';
 import reduceWord from '@/libs/reduceWord';
+import replaceYo from '@/libs/replaceYo';
 import type { CompareWordsResult } from '@/types/CompareWordsResult';
+import type { ProposedLetter } from '@/types/ProposedLetter';
 
 function checkWordExist(word: string) {
   const combinations = generateYoCombinations(word);

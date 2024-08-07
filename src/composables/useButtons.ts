@@ -1,8 +1,9 @@
-import type { KeyboardButton } from '@/types/KeyboardButton';
+import { ref } from 'vue';
+
+import { BUTTON_APPLY, BUTTON_DELETE } from '@/constants/buttons';
 import { KeyboardType } from '@/enums/keyboardType';
 import { LetterStatus } from '@/enums/letterStatus';
-import { BUTTON_APPLY, BUTTON_DELETE } from '@/constants/buttons';
-import { ref } from 'vue';
+import type { KeyboardButton } from '@/types/KeyboardButton';
 
 const createLetterButton = (symbol: string): KeyboardButton => ({
   symbol,

@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { LetterStatus } from '@/enums/letterStatus';
 import { type PropType } from 'vue';
+
+import { LetterStatus } from '@/enums/letterStatus';
+
 const props = defineProps({
   letter: {
     type: String,
@@ -23,6 +25,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (event: 'click', payload: { status: LetterStatus; rowIndex: number; cellIndex: number }): void;
 }>();
+
 function onClick() {
   if (props.status === LetterStatus.DEFAULT) return;
   emit('click', {
@@ -32,10 +35,8 @@ function onClick() {
   });
 }
 </script>
-
 <template>
   <div
-    @click="onClick"
     class="relative flex aspect-[0.92/1] max-w-[calc((100%_-_24px)_/_5)] flex-grow select-none items-center justify-center rounded-md border text-3xl leading-[62px] sm:text-xl"
     :class="{
       'border-[#ffdd2d]': status === LetterStatus.DEFAULT,
@@ -43,6 +44,7 @@ function onClick() {
       'border-white bg-white text-black': status === LetterStatus.WRONG_PLACE,
       'border-[#ffdd2d] bg-[#ffdd2d] text-black': status === LetterStatus.CORRECT
     }"
+    @click="onClick"
   >
     {{ letter }}
     <slot name="tooltip" :position="{ rowIndex, cellIndex }" />
