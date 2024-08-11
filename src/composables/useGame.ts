@@ -2,6 +2,7 @@ import { computed, reactive, ref } from 'vue';
 
 import useButtons from '@/composables/useButtons';
 import useTooltip from '@/composables/useTooltip';
+import { MAX_ROUNDS, MAX_CELLS, ERROR_ANIMATION_DELAY } from '@/constants/gameConfig';
 import words from '@/data/words.json';
 import { ErrorStatus } from '@/enums/errorStatus';
 import { GameStatus } from '@/enums/gameStatus';
@@ -13,6 +14,7 @@ import getRandomNumber from '@/libs/getRandomNumber';
 import reduceWord from '@/libs/reduceWord';
 import type { Cell } from '@/types/Cell';
 import type { CompareWordsResult } from '@/types/CompareWordsResult';
+
 
 export default function useGame() {
   const { buttons, updateButtonStatus, resetButtons } = useButtons();
@@ -44,10 +46,10 @@ export default function useGame() {
   });
 
   function fillGrid() {
-    return Array(6)
+    return Array(MAX_ROUNDS)
       .fill(null)
       .map(() =>
-        Array(5)
+        Array(MAX_CELLS)
           .fill(null)
           .map(() => ({ letter: '', status: LetterStatus.DEFAULT }))
       );
@@ -64,15 +66,15 @@ export default function useGame() {
     modal.value = false;
   }
   function onInput(letter: string) {
-    if (grid.value[round.value][4].letter) return;
+    if (grid.value[round.value][MAX_CELLS - 1].letter) return;
     grid.value[round.value][cell.value].letter = letter.toUpperCase();
-    if (cell.value < 4) {
+    if (cell.value < MAX_CELLS - 1) {
       cell.value += 1;
     }
   }
   function onClearLetter() {
     if (cell.value === 0) return;
-    if (cell.value === 4 && grid.value[round.value][cell.value].letter !== '') {
+    if (cell.value === MAX_CELLS - 1 && grid.value[round.value][cell.value].letter !== '') {
       grid.value[round.value][cell.value].letter = '';
       return;
     }
@@ -86,7 +88,7 @@ export default function useGame() {
       modal.value = true;
       return true;
     }
-    if (round.value === 5) {
+    if (round.value === MAX_ROUNDS - 1) {
       isGameOver.value = true;
       gameStatus.value = GameStatus.LOSE;
       modal.value = true;
@@ -109,7 +111,7 @@ export default function useGame() {
         errorState.active = false;
         errorState.type = null;
         resolve();
-      }, 500);
+      }, ERROR_ANIMATION_DELAY);
     });
   }
   function getTargetPosition({ proposedWord }: CompareWordsResult) {
@@ -127,7 +129,7 @@ export default function useGame() {
   async function onCheckWord() {
     const currentRow = grid.value[round.value];
 
-    if (cell.value !== 4 || currentRow[cell.value].letter === '') return;
+    if (cell.value !== MAX_CELLS - 1 || currentRow[cell.value].letter === '') return;
 
     const reducedWord = reduceWord(currentRow);
     if (usedWords.value.includes(reducedWord)) {

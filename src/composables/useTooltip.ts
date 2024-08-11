@@ -1,5 +1,6 @@
 import { reactive, ref } from 'vue';
 
+import { TOOLTIP_HIDE_DELAY } from '@/constants/gameConfig';
 import { TooltipEmojis, TooltipMessages } from '@/constants/tooltipMessages';
 import { LetterStatus } from '@/enums/letterStatus';
 import { TOOLTIP_MESSAGE } from '@/enums/tooltipMessage';
@@ -41,7 +42,7 @@ export default function useTooltip() {
     tooltip.show = true;
     tooltipTimeout = setTimeout(() => {
       tooltip.show = false;
-    }, 3000);
+    }, TOOLTIP_HIDE_DELAY);
   }
   function hideTooltip() {
     if (preventCloseTooltip.value) {
