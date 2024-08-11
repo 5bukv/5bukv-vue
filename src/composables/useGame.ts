@@ -28,7 +28,6 @@ export default function useGame() {
 
   const modal = ref(false);
   const secretWord = ref<string>('');
-  const isGameOver = ref<boolean>(false);
   const gameStatus = ref<GameStatus>(GameStatus.PLAYING);
   const grid = ref<Cell[][]>(fillGrid());
   const round = ref<0 | 1 | 2 | 3 | 4 | 5>(0);
@@ -58,7 +57,6 @@ export default function useGame() {
     grid.value = fillGrid();
     round.value = 0;
     cell.value = 0;
-    isGameOver.value = false;
     gameStatus.value = GameStatus.PLAYING;
     resetButtons();
     const number = getRandomNumber(0, words.length - 1);
@@ -83,13 +81,11 @@ export default function useGame() {
   }
   function checkGameStatus(result: CompareWordsResult) {
     if (result.status === RoundStatus.WIN) {
-      isGameOver.value = true;
       gameStatus.value = GameStatus.WIN;
       modal.value = true;
       return true;
     }
     if (round.value === MAX_ROUNDS - 1) {
-      isGameOver.value = true;
       gameStatus.value = GameStatus.LOSE;
       modal.value = true;
       return true;
