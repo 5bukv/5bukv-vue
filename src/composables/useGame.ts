@@ -15,7 +15,6 @@ import reduceWord from '@/libs/reduceWord';
 import type { Cell } from '@/types/Cell';
 import type { CompareWordsResult } from '@/types/CompareWordsResult';
 
-
 export default function useGame() {
   const { buttons, updateButtonStatus, resetButtons } = useButtons();
   const {

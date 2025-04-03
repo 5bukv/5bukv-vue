@@ -19,7 +19,7 @@ defineProps({
   }
 });
 
-const emit = defineEmits<{(event: 'hide'): void}>();
+const emit = defineEmits<{ (event: 'hide'): void }>();
 function onClick() {
   emit('hide');
 }
@@ -38,10 +38,10 @@ function onClick() {
       config.show &&
       rowIndex === config.position.rowIndex &&
       cellIndex === config.position.cellIndex
-        ? 'opacity-100 [transform:translateY(0)_translateZ(1px)_scale(1)]'
-        : 'pointer-events-none opacity-0 [transform:translateY(-4px)_translateZ(1px)_scale(0.5)]'
+        ? '[transform:translateY(0)_translateZ(1px)_scale(1)] opacity-100'
+        : 'pointer-events-none [transform:translateY(-4px)_translateZ(1px)_scale(0.5)] opacity-0'
     "
-    class="absolute top-[calc(100%+15px)] z-20 h-auto min-w-32 rounded-lg bg-white p-2.5 text-center text-[13px] font-normal leading-[1.15] text-[#202020] duration-300 ease-[cubic-bezier(0.4,0.1,0.2,1)] before:absolute before:top-0 before:inline-block before:-translate-x-2/4 before:-translate-y-6 before:border-[12px] before:border-solid before:border-transparent before:border-b-[white] before:content-['']"
+    class="absolute top-[calc(100%+15px)] z-20 h-auto min-w-32 rounded-lg bg-white p-2.5 text-center text-[13px] leading-[1.15] font-normal text-[#202020] duration-300 ease-[cubic-bezier(0.4,0.1,0.2,1)] before:absolute before:top-0 before:inline-block before:-translate-x-2/4 before:-translate-y-6 before:border-[12px] before:border-solid before:border-transparent before:border-b-[white] before:content-['']"
     @click.stop="onClick"
   >
     <span class="block" v-html="config.message"></span>

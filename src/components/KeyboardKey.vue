@@ -13,9 +13,9 @@ defineProps({
   }
 });
 const emit = defineEmits<{
-  (e: 'input', payload: string): void
-  (e: 'apply'): void,
-  (e: 'delete'): void,
+  (e: 'input', payload: string): void;
+  (e: 'apply'): void;
+  (e: 'delete'): void;
 }>();
 
 const handleKeyClick = (key: KeyboardButton) => {
@@ -39,7 +39,7 @@ const handleKeyClick = (key: KeyboardButton) => {
       'border-white bg-white text-black': keyboardButton.status === LetterStatus.WRONG_PLACE,
       'border-[#5f5f5f] bg-[#5f5f5f] text-white': keyboardButton.status === LetterStatus.NOT_IN_WORD
     }"
-    class="h-10 w-8 select-none rounded-md border p-0 font-semibold sm:aspect-[0.88_/_1] sm:h-[60px] sm:w-auto"
+    class="h-10 w-8 rounded-md border p-0 font-semibold select-none sm:aspect-[0.88_/_1] sm:h-[60px] sm:w-auto"
     @click="handleKeyClick(keyboardButton)"
   >
     {{ keyboardButton.symbol }}
@@ -47,7 +47,7 @@ const handleKeyClick = (key: KeyboardButton) => {
   <button
     v-if="keyboardButton.symbol === BUTTON_DELETE"
     :key="keyboardButton.symbol"
-    class="mb-6 mr-2 h-10 w-8 select-none rounded-md border border-gray-900 border-white/25 p-0 sm:aspect-[0.88_/_1] sm:h-[60px] sm:w-auto"
+    class="mr-2 mb-6 h-10 w-8 rounded-md border border-gray-900 border-white/25 p-0 select-none sm:aspect-[0.88_/_1] sm:h-[60px] sm:w-auto"
     @click="handleKeyClick(keyboardButton)"
   >
     ⌫
@@ -55,7 +55,7 @@ const handleKeyClick = (key: KeyboardButton) => {
   <button
     v-if="keyboardButton.symbol === BUTTON_APPLY"
     :key="keyboardButton.symbol"
-    class="mb-6 mr-2 h-10 w-8 select-none rounded-md border border-gray-900 border-white/25 p-0 sm:aspect-[0.88_/_1] sm:h-[60px] sm:w-auto"
+    class="mr-2 mb-6 h-10 w-8 rounded-md border border-gray-900 border-white/25 p-0 select-none sm:aspect-[0.88_/_1] sm:h-[60px] sm:w-auto"
     @click="handleKeyClick(keyboardButton)"
   >
     ⏎
