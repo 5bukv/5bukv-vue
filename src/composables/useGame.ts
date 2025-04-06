@@ -9,13 +9,16 @@ import { GameStatus } from '@/enums/gameStatus';
 import { LetterStatus } from '@/enums/letterStatus';
 import { RoundStatus } from '@/enums/roundStatus';
 import { TOOLTIP_MESSAGE } from '@/enums/tooltipMessage';
-import compareWords from '@/libs/compareWords';
 import getRandomNumber from '@/libs/getRandomNumber';
-import reduceWord from '@/libs/reduceWord';
 import type { Cell } from '@/types/Cell';
 import type { CompareWordsResult } from '@/types/CompareWordsResult';
+import { useGameServiceFactory, GameMode } from '@/services/GameServiceFactory';
+import type { ProposedLetter } from '@/types/ProposedLetter';
 
 export default function useGame() {
+  const gameServiceFactory = useGameServiceFactory();
+  const gameService = computed(() => gameServiceFactory.service);
+
   const { buttons, updateButtonStatus, resetButtons } = useButtons();
   const {
     tooltip,
@@ -27,6 +30,7 @@ export default function useGame() {
 
   const modal = ref(false);
   const secretWord = ref<string>('');
+  const gameId = ref<string | null>(null);
   const gameStatus = ref<GameStatus>(GameStatus.PLAYING);
   const grid = ref<Cell[][]>(fillGrid());
   const round = ref<0 | 1 | 2 | 3 | 4 | 5>(0);
@@ -52,12 +56,25 @@ export default function useGame() {
           .map(() => ({ letter: '', status: LetterStatus.DEFAULT }))
       );
   }
-  function onStartGame() {
+  async function onStartGame() {
     grid.value = fillGrid();
     round.value = 0;
     cell.value = 0;
     gameStatus.value = GameStatus.PLAYING;
     resetButtons();
+
+    try {
+      const gameData = await gameService.value.createGame();
+      gameId.value = gameData.id || null;
+      if (gameData.secretWord) {
+        secretWord.value = gameData.secretWord;
+      }
+      modal.value = false;
+    } catch (error) {
+      console.error('Ошибка при создании игры:', error);
+      // Обработка ошибки
+    }
+
     const number = getRandomNumber(0, words.length - 1);
     secretWord.value = words[number];
     modal.value = false;
@@ -69,6 +86,7 @@ export default function useGame() {
       cell.value += 1;
     }
   }
+
   function onClearLetter() {
     if (cell.value === 0) return;
     if (cell.value === MAX_CELLS - 1 && grid.value[round.value][cell.value].letter !== '') {
@@ -78,6 +96,7 @@ export default function useGame() {
     cell.value -= 1;
     grid.value[round.value][cell.value].letter = '';
   }
+
   function checkGameStatus(result: CompareWordsResult) {
     if (result.status === RoundStatus.WIN) {
       gameStatus.value = GameStatus.WIN;
@@ -91,6 +110,7 @@ export default function useGame() {
     }
     return false;
   }
+
   function updateStatuses(currentRow: Cell[], result: CompareWordsResult) {
     currentRow.forEach((cell, index) => {
       const status = result.proposedWord[index].status;
@@ -98,6 +118,7 @@ export default function useGame() {
       updateButtonStatus(cell.letter, status);
     });
   }
+
   function triggerErrorAnimation(): Promise<void> {
     tooltip.show = false;
     return new Promise((resolve) => {
@@ -109,48 +130,49 @@ export default function useGame() {
       }, ERROR_ANIMATION_DELAY);
     });
   }
-  function getTargetPosition({ proposedWord }: CompareWordsResult) {
-    let cellIndex = 0;
-    for (let index = 0; index < proposedWord.length; index++) {
-      if (proposedWord[index].status === LetterStatus.WRONG_PLACE) {
-        cellIndex = index;
-      } else if (proposedWord[index].status === LetterStatus.NOT_IN_WORD) {
-        cellIndex = index;
-        break;
-      }
-    }
-    return cellIndex;
-  }
+
   async function onCheckWord() {
     const currentRow = grid.value[round.value];
+    const word = currentRow.map((cell) => cell.letter).join('');
 
-    if (cell.value !== MAX_CELLS - 1 || currentRow[cell.value].letter === '') return;
+    if (word.length !== MAX_CELLS) return;
 
-    const reducedWord = reduceWord(currentRow);
-    if (usedWords.value.includes(reducedWord)) {
+    if (usedWords.value.includes(word)) {
       errorState.type = ErrorStatus.REPEATED;
       await triggerErrorAnimation();
       triggerTooltip(TOOLTIP_MESSAGE.WORD_ALREADY_USED, round.value, 0);
       return;
     }
 
-    const result = compareWords(currentRow, secretWord.value);
-    if (result.status === RoundStatus.NOT_FOUND) {
-      errorState.type = ErrorStatus.NOT_FOUND;
-      await triggerErrorAnimation();
-      triggerTooltip(TOOLTIP_MESSAGE.INVALID_WORD, round.value, 0);
-      return;
+    const proposedWord: ProposedLetter[] = currentRow.map((cell) => ({
+      letter: cell.letter,
+      status: LetterStatus.DEFAULT
+    }));
+
+    try {
+      // Отправляем попытку через сервис
+      const result = await gameService.value.submitAttempt(gameId.value, proposedWord);
+
+      if (result.status === RoundStatus.NOT_FOUND) {
+        triggerTooltip(TOOLTIP_MESSAGE.INVALID_WORD, round.value, 2);
+        await triggerErrorAnimation();
+        return;
+      }
+
+      // Обновляем статусы клеток и кнопок
+      updateStatuses(currentRow, result);
+
+      // Проверяем результат
+      if (!checkGameStatus(result)) {
+        round.value += 1;
+        cell.value = 0;
+      }
+    } catch (error) {
+      console.error('Ошибка при проверке слова:', error);
+      // Обработка ошибки
     }
-
-    updateStatuses(currentRow, result);
-    if (checkGameStatus(result)) return;
-
-    const cellIndex = getTargetPosition(result);
-    const tooltipStatus = getTooltipMessageByLetterStatus(result.proposedWord[cellIndex].status);
-    triggerTooltip(tooltipStatus, round.value, cellIndex);
-    cell.value = 0;
-    round.value += 1;
   }
+
   function onCellClick(data: { status: LetterStatus; rowIndex: number; cellIndex: number }) {
     if (
       tooltip.show &&
@@ -162,6 +184,15 @@ export default function useGame() {
     }
     const message = getTooltipMessageByLetterStatus(data.status);
     triggerTooltip(message, data.rowIndex, data.cellIndex);
+  }
+
+  function setGameMode(mode: GameMode) {
+    gameServiceFactory.mode = mode;
+  }
+
+  // Функция для установки базового URL для API
+  function setApiBaseUrl(url: string) {
+    gameServiceFactory.setApiBaseUrl(url);
   }
 
   return {
@@ -179,6 +210,9 @@ export default function useGame() {
     onInput,
     onClearLetter,
     onCheckWord,
-    triggerTooltip
+    triggerTooltip,
+    setGameMode,
+    setApiBaseUrl,
+    currentMode: computed(() => gameServiceFactory.mode)
   };
 }

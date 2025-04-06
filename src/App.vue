@@ -5,8 +5,11 @@ import AppModal from '@/components/AppModal.vue';
 import CellTooltip from '@/components/CellTooltip.vue';
 import KeyboardKey from '@/components/KeyboardKey.vue';
 import RoundCell from '@/components/RoundCell.vue';
-import useGame from '@/composables/useGame';
 import { GameStatus } from '@/enums/gameStatus';
+import { GameMode } from '@/services/GameServiceFactory.ts';
+import GameModeSwitch from '@/components/GameModeSwitch.vue';
+
+import useGame from '@/composables/useGame';
 
 const {
   grid,
@@ -16,13 +19,20 @@ const {
   errorState,
   round,
   tooltip,
+  currentMode,
   hideTooltip,
   onStartGame,
   onInput,
   onClearLetter,
   onCheckWord,
-  onCellClick
+  onCellClick,
+  setGameMode
 } = useGame();
+
+function handleModeChange(mode: GameMode) {
+  setGameMode(mode);
+  onStartGame();
+}
 
 onMounted(() => {
   modal.value = true;
@@ -34,7 +44,11 @@ onMounted(() => {
   >
     <div class="w-full max-w-[1104px] bg-[#1c1c1e] px-4 py-4 sm:h-auto sm:rounded-3xl sm:py-24">
       <div class="mx-auto max-w-[655px]">
-        <img src="/logo.png" class="mb-6 h-6" alt="Игра «5 букв»" />
+        <div class="mb-6 flex items-center justify-between">
+          <img src="/logo.png" class="mb-6 h-6" alt="Игра «5 букв»" />
+          <GameModeSwitch :current-mode="currentMode" @change="handleModeChange" />
+        </div>
+
         <div class="relative mx-auto mb-[26px] max-w-[80%] space-y-1.5 sm:max-w-64">
           <div
             v-for="(row, rowIndex) in grid"
