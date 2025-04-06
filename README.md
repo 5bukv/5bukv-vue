@@ -5,7 +5,7 @@
 ## Так же 
 
 * Демо: [https://5bukv.quest](https://5bukv.quest)
-* Версия игры на [React](https://github.com/avenikolay/5bukv-react)
+* Версия игры на [React](https://github.com/5bukv/5bukv-react)
 
 ## Установка
 
